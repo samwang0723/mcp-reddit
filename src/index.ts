@@ -11,6 +11,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import dotenv from 'dotenv';
 import config from './config/index.js';
+import * as redditService from './services/reddit.js';
 
 // Load environment variables
 dotenv.config();
@@ -22,16 +23,20 @@ class McpServerApp {
       version: '1.0.0',
     });
 
-    // Register tool
+    // Register Reddit tools
     server.tool(
-      'reddit-function',
-      'Reddit function description',
+      'reddit-search',
+      'Search Reddit posts by query',
       {
-        data: z.string().describe(`Parameter description`),
+        query: z.string().describe('Search query for Reddit posts'),
+        limit: z
+          .number()
+          .optional()
+          .describe('Number of results to return (default 10)'),
       },
-      async ({ data }) => {
+      async ({ query, limit }) => {
         try {
-          const result = `execution result: ${data}`;
+          const result = await redditService.searchPosts(query, limit || 10);
           return {
             content: [
               {
@@ -43,7 +48,123 @@ class McpServerApp {
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : String(error);
-          throw new Error(`Error executing sample function: ${errorMessage}`);
+          throw new Error(`Error executing reddit-search: ${errorMessage}`);
+        }
+      }
+    );
+
+    server.tool(
+      'reddit-hot-all',
+      'Get hot posts from all subreddits',
+      {
+        limit: z
+          .number()
+          .optional()
+          .describe('Number of results to return (default 10)'),
+      },
+      async ({ limit }) => {
+        try {
+          const result = await redditService.hotAll(limit || 10);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(result, null, 2),
+              } as TextContent,
+            ],
+          };
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          throw new Error(`Error executing reddit-hot-all: ${errorMessage}`);
+        }
+      }
+    );
+
+    server.tool(
+      'reddit-hot-subreddit',
+      'Get hot posts from a specific subreddit',
+      {
+        subreddit: z.string().describe('Subreddit name (without r/ prefix)'),
+        limit: z
+          .number()
+          .optional()
+          .describe('Number of results to return (default 10)'),
+      },
+      async ({ subreddit, limit }) => {
+        try {
+          const result = await redditService.hotBySub(subreddit, limit || 10);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(result, null, 2),
+              } as TextContent,
+            ],
+          };
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          throw new Error(
+            `Error executing reddit-hot-subreddit: ${errorMessage}`
+          );
+        }
+      }
+    );
+
+    server.tool(
+      'reddit-new-subreddit',
+      'Get newest posts from a specific subreddit',
+      {
+        subreddit: z.string().describe('Subreddit name (without r/ prefix)'),
+        limit: z
+          .number()
+          .optional()
+          .describe('Number of results to return (default 10)'),
+      },
+      async ({ subreddit, limit }) => {
+        try {
+          const result = await redditService.newBySub(subreddit, limit || 10);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(result, null, 2),
+              } as TextContent,
+            ],
+          };
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          throw new Error(
+            `Error executing reddit-new-subreddit: ${errorMessage}`
+          );
+        }
+      }
+    );
+
+    server.tool(
+      'reddit-comments',
+      'Get comments for a specific Reddit post',
+      {
+        subreddit: z.string().describe('Subreddit name (without r/ prefix)'),
+        postId: z.string().describe('Reddit post ID'),
+      },
+      async ({ subreddit, postId }) => {
+        try {
+          const result = await redditService.comments(subreddit, postId);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(result, null, 2),
+              } as TextContent,
+            ],
+          };
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          throw new Error(`Error executing reddit-comments: ${errorMessage}`);
         }
       }
     );

@@ -38,7 +38,7 @@ COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY --from=builder /app/.env ./.env
 
 # Expose the port
-EXPOSE 3000
+EXPOSE 3006
 
 # Set environment variables
 ENV NODE_ENV=production

@@ -1,95 +1,63 @@
 # MCP Reddit Server
 
-Reddit MCP server
+Reddit MCP server that provides tools to interact with Reddit.
 
 ## 🚀 Features
 
-- **TypeScript**: Full type safety with modern TypeScript patterns
-- **HTTP Transport**: RESTful API with Express.js server
-- **Session Management**: Stateful connections with proper session handling
-- **Configuration Management**: Environment-based configuration with validation
-- **Error Handling**: Comprehensive error handling and logging
-- **Health Checks**: Built-in health monitoring endpoints
-- **Docker Support**: Production-ready containerization
-- **Development Tools**: ESLint, Prettier, and testing setup
-- **Production Ready**: Optimized for scalability and security
+- **TypeScript**: Full type safety with modern TypeScript patterns.
+- **Reddit Tools**: A suite of tools to search posts, get hot/new posts, and view comments.
+- **HTTP Transport**: RESTful API with Express.js for MCP communication.
+- **Session Management**: Stateful connections with proper session handling.
+- **Configuration Management**: Environment-based configuration using `.env` files.
+- **Error Handling**: Comprehensive error handling and logging.
+- **Health Checks**: Built-in `/health` monitoring endpoint.
+- **Docker Support**: Production-ready containerization with a `Dockerfile`.
 
 ## 📋 Prerequisites
 
 - Node.js 20+
-- npm or yarn
-- Docker (optional, for containerization)
+- npm
 
 ## 🛠️ Quick Start
 
-### Option 1: Use the Project Generator (Recommended)
-
 ```bash
-# Clone the template
-git clone <your-repo-url>
+# 1. Clone the repository
+git clone git@github.com:samwang0723/mcp-reddit.git
 cd mcp-reddit
 
-
-# Create a new project using the generator
-./create-mcp-project your-project-name --description "Your project description" --author "Your Name"
-
-# Or use the Node.js script directly
-node setup-new-project.js your-project-name --description "Your project description" --author "Your Name"
-```
-
-#### Generator Options:
-
-- `--description <desc>`: Project description
-- `--author <name>`: Author name
-- `--target-dir <dir>`: Target directory (default: mcp-<project-name>)
-- `--install-deps`: Install npm dependencies automatically
-- `--no-git`: Skip git repository initialization
-
-### Option 2: Manual Setup
-
-```bash
-# Clone the template
-git clone <your-repo-url>
-cd mcp-template
-
-# Install dependencies
+# 2. Install dependencies
 npm install
 
-# Copy environment configuration
-cp .env.example .env  # Create this file with your settings
+# 3. Create an environment file
+# Copy .env.example if it exists, or create a new .env file
+# For this project, it's optional, but good practice.
+touch .env
+
+# 4. Start the development server
+npm run dev
 ```
 
-### 2. Environment Configuration
+The server will be running at `http://localhost:3000` (or the port specified in your `.env` file).
 
-Create a `.env` file in the root directory:
+## 🔧 Environment Configuration
+
+Create a `.env` file in the root directory to override default settings:
 
 ```env
 # Server Configuration
 PORT=3000
 LOG_LEVEL=info
-
-# Add your custom environment variables here
 ```
 
-### 3. Development
+## 📜 Development Scripts
 
-```bash
-# Start development server with hot reload
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Run tests
-npm test
-
-# Lint and format code
-npm run lint
-npm run lint:fix
-```
+- `npm run dev`: Start the development server with hot reload using `tsx`.
+- `npm run build`: Compile TypeScript to JavaScript for production.
+- `npm start`: Run the compiled production server.
+- `npm run test`: Run Jest tests.
+- `npm run lint`: Lint the codebase using ESLint.
+- `npm run lint:fix`: Automatically fix linting issues.
+- `npm run quality`: Run type-checking, linting, and formatting checks.
 
 ## 🏗️ Project Structure
 
@@ -97,321 +65,98 @@ npm run lint:fix
 mcp-reddit/
 ├── src/
 │   ├── config/           # Configuration management
-│   │   └── index.ts      # Main config file
-│   ├── utils/            # Utility functions
-│   └── index.ts          # Main server application
-├── create-mcp-project    # Bash script for project generation
-├── setup-new-project.js  # Node.js project generator
+│   │   └── index.ts
+│   ├── services/         # Core application logic (e.g., Reddit API interaction)
+│   │   └── reddit.ts
+│   ├── utils/            # Utility functions (logging, error handling)
+│   │   ├── error.ts
+│   │   └── logger.ts
+│   └── index.ts          # Main server application and MCP tool registration
 ├── Dockerfile            # Docker configuration
 ├── package.json          # Dependencies and scripts
-├── tsconfig.json         # TypeScript configuration
-└── README.md            # This file
+└── tsconfig.json         # TypeScript configuration
 ```
 
-## 🔧 Project Generator
-
-This template includes powerful project generation tools to quickly create new MCP servers:
-
-### Features:
-
-- **Automatic Name Conversion**: Converts kebab-case names to all required formats (camelCase, PascalCase, etc.)
-- **File Templating**: Updates all files with the new project name and details
-- **Git Integration**: Optionally initializes a new git repository
-- **Dependency Management**: Can automatically install npm dependencies
-- **Smart Copy Logic**: Excludes development files and prevents infinite recursion
-
-### Usage Examples:
-
-```bash
-# Basic usage
-./create-mcp-project weather-service
-
-# With full options
-./create-mcp-project task-manager \
-  --description "AI-powered task management MCP server" \
-  --author "Your Name" \
-  --install-deps
-
-# Custom target directory
-./create-mcp-project file-processor --target-dir ./my-custom-server
-
-# Skip git initialization
-./create-mcp-project data-analyzer --no-git
-```
-
-## 🔧 Architecture
+## 🏛️ Architecture
 
 ### Core Components
 
-1. **McpServerApp**: Main application class that orchestrates the MCP server
-2. **Configuration**: Environment-based configuration with type safety
-3. **Session Management**: HTTP-based stateful sessions with cleanup
-4. **Transport Layer**: StreamableHTTPServerTransport for MCP communication
-5. **Error Handling**: Comprehensive error handling with proper HTTP responses
+1.  **McpServerApp**: The main application class in `src/index.ts` that configures and runs the MCP server.
+2.  **Express.js**: Handles HTTP requests, routing, and middleware.
+3.  **MCP SDK**: The `@modelcontextprotocol/sdk` provides the core functionality for creating MCP servers and tools.
+4.  **Reddit Service**: `src/services/reddit.ts` contains the logic for interacting with the public Reddit JSON API.
+5.  **Session Management**: Stateful HTTP-based sessions are managed to handle conversations.
 
 ### HTTP Endpoints
 
-- `GET /health` - Health check endpoint
-- `POST /mcp` - Main MCP communication endpoint
-- `GET /mcp` - Server-to-client notifications via SSE
-- `DELETE /mcp` - Session termination
+- `GET /health`: Health check endpoint.
+- `POST /mcp`: Main MCP endpoint for receiving requests from clients.
+- `GET /mcp`: Endpoint for server-to-client notifications via Server-Sent Events (SSE).
+- `DELETE /mcp`: Endpoint for clients to terminate their session.
 
-## 🛠️ Customization Guide
+## 🛠️ Available Tools
 
-### Adding New Tools
+The server exposes several tools for interacting with Reddit.
 
-To add a new MCP tool, modify the `createServer()` method in `src/index.ts`:
+### `reddit-search`
 
-```typescript
-// Register your custom tool
-server.tool(
-  'reddit-tool',
-  'Description of your tool',
-  {
-    // Define input schema using Zod
-    parameter1: z.string().describe('Parameter description'),
-    parameter2: z.number().optional().describe('Optional parameter'),
-  },
-  async ({ parameter1, parameter2 }) => {
-    try {
-      // Your tool implementation here
-      const result = await yourCustomLogic(parameter1, parameter2);
+Search Reddit posts by a query.
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(result, null, 2),
-          } as TextContent,
-        ],
-      };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      throw new Error(`Error in your-tool-name: ${errorMessage}`);
-    }
-  }
-);
-```
+- **Parameters**:
+  - `query` (string, required): Search query for Reddit posts.
+  - `limit` (number, optional): Number of results to return (default 10).
 
-### Configuration Management
+### `reddit-hot-all`
 
-Add new configuration options in `src/config/index.ts`:
+Get hot posts from all subreddits (r/all).
 
-```typescript
-interface Config {
-  logging: LoggingConfig;
-  server: ServerConfig;
-  // Add your custom config sections
-  database: {
-    url: string;
-    timeout: number;
-  };
-  external: {
-    apiKey: string;
-    baseUrl: string;
-  };
-}
+- **Parameters**:
+  - `limit` (number, optional): Number of results to return (default 10).
 
-const config: Config = {
-  // ... existing config
-  database: {
-    url: process.env.DATABASE_URL || 'sqlite://memory',
-    timeout: parseInt(process.env.DB_TIMEOUT || '5000', 10),
-  },
-  external: {
-    apiKey: process.env.EXTERNAL_API_KEY || '',
-    baseUrl: process.env.EXTERNAL_BASE_URL || 'https://api.example.com',
-  },
-};
-```
+### `reddit-hot-subreddit`
 
-### Adding Middleware
+Get hot posts from a specific subreddit.
 
-Add Express middleware in the `run()` method:
+- **Parameters**:
+  - `subreddit` (string, required): Subreddit name (without the `r/` prefix).
+  - `limit` (number, optional): Number of results to return (default 10).
 
-```typescript
-async run() {
-  const app = express();
-  app.use(express.json());
+### `reddit-new-subreddit`
 
-  // Add your custom middleware
-  app.use(cors()); // CORS support
-  app.use(helmet()); // Security headers
-  app.use(morgan('combined')); // Request logging
+Get the newest posts from a specific subreddit.
 
-  // ... rest of the setup
-}
-```
+- **Parameters**:
+  - `subreddit` (string, required): Subreddit name (without the `r/` prefix).
+  - `limit` (number, optional): Number of results to return (default 10).
+
+### `reddit-comments`
+
+Get the comments for a specific Reddit post.
+
+- **Parameters**:
+  - `subreddit` (string, required): Subreddit name where the post resides.
+  - `postId` (string, required): The ID of the post.
 
 ## 🐳 Docker Deployment
 
-### Build and Run
+You can build and run the server in a Docker container.
 
 ```bash
-# Build Docker image
+# 1. Build the Docker image
 docker build -t mcp-reddit-server .
 
-# Run container
-docker run -p 3000:3000 --env-file .env mcp-reddit-server
+# 2. Run the container
+# You can pass environment variables directly or use --env-file
+docker run -p 3000:3000 -e PORT=3000 mcp-reddit-server
 ```
-
-### Docker Compose (Recommended)
-
-Create a `docker-compose.yml`:
-
-```yaml
-version: '3.8'
-services:
-  mcp-server:
-    build: .
-    ports:
-      - '3000:3000'
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - LOG_LEVEL=info
-    restart: unless-stopped
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-```
-
-Run with:
-
-```bash
-docker-compose up -d
-```
-
-## 🔒 Security Best Practices
-
-This template implements several security measures:
-
-- **Input Validation**: Zod schema validation for all tool parameters
-- **Error Handling**: Safe error responses without information leakage
-- **Session Management**: Proper session cleanup and validation
-- **HTTP Security**: Ready for security headers and CORS configuration
-- **Environment Variables**: Secure configuration management
-
-### Recommended Additional Security
-
-```typescript
-// Add security middleware
-import helmet from 'helmet';
-import cors from 'cors';
-import rateLimit from 'express-rate-limit';
-
-app.use(helmet());
-app.use(
-  cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || false,
-  })
-);
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-});
-app.use('/mcp', limiter);
-```
-
-## 📊 Monitoring and Logging
-
-The template includes basic logging setup. For production, consider adding:
-
-- **Structured Logging**: Winston with JSON format
-- **Metrics Collection**: Prometheus metrics
-- **Health Checks**: Comprehensive health endpoints
-- **APM Integration**: Application Performance Monitoring
 
 ## 🧪 Testing
+
+Run the test suite using Jest:
 
 ```bash
 # Run all tests
 npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run tests with coverage
-npm run test:coverage
 ```
 
-### Writing Tests
-
-Create test files in `src/**/*.test.ts`:
-
-```typescript
-import { describe, test, expect } from '@jest/globals';
-// Your test imports
-
-describe('YourComponent', () => {
-  test('should handle valid input', async () => {
-    // Test implementation
-  });
-});
-```
-
-## 🚀 Production Deployment
-
-### Environment Variables
-
-```env
-NODE_ENV=production
-PORT=3000
-LOG_LEVEL=warn
-
-# Add your production-specific variables
-DATABASE_URL=postgresql://...
-REDIS_URL=redis://...
-API_KEYS=...
-```
-
-### Performance Optimization
-
-- Enable gzip compression
-- Implement proper caching headers
-- Use connection pooling for databases
-- Monitor memory usage and implement limits
-- Set up log rotation
-
-### Scaling Considerations
-
-- Load balancing across multiple instances
-- Database connection pooling
-- Session store externalization (Redis)
-- Horizontal pod autoscaling in Kubernetes
-
-## 📚 References
-
-- [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
-- [MCP SDK Documentation](https://github.com/modelcontextprotocol/typescript-sdk)
-- [Express.js Documentation](https://expressjs.com/)
-- [TypeScript Documentation](https://www.typescriptlang.org/)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Run the test suite
-6. Submit a pull request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Support
-
-For questions and support:
-
-- Check the [MCP Documentation](https://modelcontextprotocol.io/)
-- Review existing issues
-- Create a new issue with detailed information
-
----
-
-**Happy coding! 🎉**
+Create new test files in your project ending with `.test.ts` to add more tests.
